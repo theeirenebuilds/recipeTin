@@ -12,16 +12,15 @@ echo 'ls /tmp/'
 ls /tmp/*
 #tail -f $temp_file > /dev/null &
 
-curl $url -i  \
+# sed '1,/^$/d' skips everything until the blank line that separates headers from the html body (For HTML/General payloads)
+curl -fsSLO --url "$url" \
 -H 'x-requested-with: XMLHttpRequest' \
---compressed -o $filename | sed '1,/^$/d'
+--compressed -w "html" -o $filename.html | sed '1,/^$/d'
 
 # if the filename ends in html strip it out
-sed 's/\.html$//' <<< "$filename" > /dev/null || filename="$filename.html"
+#sed 's/\.html$//' <<< "$filename" > /dev/null || filename="$filename.html"
 
-cat $filename > $temp_file
-
-perl -e 's#<div data-testid="ContentFooterBottom" class="ContentFooterBottom-cbbwZo iSuBdg">.*?</div>(?=\s*</main>)##s' $temp_file && mv /tmp/tmp.* "$filename".html
+perl -e 's#<div data-testid="ContentFooterBottom" class="ContentFooterBottom-cbbwZo iSuBdg">.*?</div>(?=\s*</main>)##s' "$filename".html
 
 open .
 
