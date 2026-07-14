@@ -1,27 +1,22 @@
 #!/bin/bash
 
 url=${1:?"Usage: $0 <url> <filename>"}
-temp_file=$(mktemp -p /tmp)
-filename=${2:?"Usage: $0 <url> <filename>"}
+filename=${2%.html:?"Usage: $0 <url> <filename>"}
 recipe_path="$HOME/Documents/icloudDocs/Recipe_backups"
+recipe=$(printf "%s.html" "$filename")
 
-cd "$recipe_path"
+#filename=${filename%.html} && filename="$filename.html"
 
-trap "rm -f $temp_file" 0 2 3 15
-echo 'ls /tmp/'
-ls /tmp/*
-#tail -f $temp_file > /dev/null &
+#cd "$recipe_path"
 
 # sed '1,/^$/d' skips everything until the blank line that separates headers from the html body (For HTML/General payloads)
-curl -fsSLO --url "$url" \
+curl -fsSL --url "$url" \
 -H 'x-requested-with: XMLHttpRequest' \
---compressed -w "html" -o $filename.html | sed '1,/^$/d'
+--compressed -o "$recipe" | sed '1,/^$/d'
 
 # if the filename ends in html strip it out
 #sed 's/\.html$//' <<< "$filename" > /dev/null || filename="$filename.html"
 
-perl -e 's#<div data-testid="ContentFooterBottom" class="ContentFooterBottom-cbbwZo iSuBdg">.*?</div>(?=\s*</main>)##s' "$filename".html
+#perl -e 's#<div data-testid="ContentFooterBottom" class="ContentFooterBottom-cbbwZo iSuBdg">.*?</div>(?=\s*</main>)##s' $filename
 
-open .
-
-/Applications/Safari.app/Contents/MacOS/Safari -bna "file:///$filename"
+echo $recipe
